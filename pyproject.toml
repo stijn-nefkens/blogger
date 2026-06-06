@@ -5,6 +5,7 @@ description = "A minimal, AI-native blogging application. Files are the source o
 requires-python = ">=3.11"
 dependencies = [
     "python-frontmatter",
+    "markdown",
 ]
 
 [tool.pytest.ini_options]
