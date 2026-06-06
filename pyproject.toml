@@ -9,6 +9,7 @@ dependencies = [
     "typer",
     "fastapi",
     "uvicorn",
+    "mcp",
 ]
 
 [project.optional-dependencies]
