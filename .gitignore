@@ -1,0 +1,7 @@
+# Disposable SQLite cache — rebuilt from posts/, never authoritative.
+index.sqlite
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/

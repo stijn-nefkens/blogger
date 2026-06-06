@@ -1,0 +1,11 @@
+[project]
+name = "blog"
+version = "0.1.0"
+description = "A minimal, AI-native blogging application. Files are the source of truth."
+requires-python = ">=3.11"
+dependencies = [
+    "python-frontmatter",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
