@@ -12,8 +12,9 @@ from core import store
 
 @pytest.fixture(autouse=True)
 def posts_dir(tmp_path, monkeypatch):
-    monkeypatch.setenv("BLOG_POSTS_DIR", str(tmp_path))
-    return tmp_path
+    monkeypatch.setenv("BLOG_POSTS_DIR", str(tmp_path / "posts"))
+    monkeypatch.setenv("BLOG_INDEX_PATH", str(tmp_path / "index.sqlite"))
+    return tmp_path / "posts"
 
 
 def test_create_writes_a_real_markdown_file(posts_dir):

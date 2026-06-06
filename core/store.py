@@ -13,6 +13,7 @@ from datetime import date
 from pathlib import Path
 
 from core.models import Post, dump, parse, slugify
+from core import index
 
 # Fields a caller may change via update_post. `slug` and `date` are permanent
 # (the slug is the stable URL; the date is the creation date), so they're out.
@@ -29,6 +30,8 @@ def list_posts(status: str | None = None, tag: str | None = None) -> list[Post]:
         if tag is not None and tag not in post.tags:
             continue
         posts.append(post)
+    # Newest-first by date, with slug as a stable tiebreaker for same-date posts.
+    posts.sort(key=lambda p: p.slug)
     posts.sort(key=lambda p: p.date, reverse=True)
     return posts
 
@@ -83,16 +86,22 @@ def update_post(slug: str, **fields) -> Post:
 
 
 def delete_post(slug: str) -> None:
-    """Remove the post's file."""
+    """Remove the post's file, then drop it from the index."""
     path = _find_path(slug)
     if path is None:
         raise ValueError(f"no such post: {slug}")
     path.unlink()
+    index.remove_post(slug)
 
 
 def set_status(slug: str, status: str) -> Post:
     """Toggle a post between draft and published."""
     return update_post(slug, status=status)
+
+
+def search(query: str) -> list[Post]:
+    """Posts matching the query, via the SQLite index, newest-first."""
+    return index.search(query)
 
 
 # --- internals ---------------------------------------------------------------
@@ -105,7 +114,8 @@ def _posts_dir() -> Path:
 def _write(post: Post) -> None:
     path = _posts_dir() / str(post.date.year) / f"{post.slug}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(dump(post), encoding="utf-8")
+    path.write_text(dump(post), encoding="utf-8")  # files first...
+    index.index_post(post)  # ...then the cache
 
 
 def _find_path(slug: str) -> Path | None:
