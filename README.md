@@ -15,11 +15,16 @@ another tool — point any Markdown-aware app at `posts/` and nothing is lost.
 
 ## Run
 
+Tooling is [uv](https://docs.astral.sh/uv/). `uv sync` creates the virtualenv
+and installs everything from `uv.lock`.
+
 ```sh
-pip install -e .            # or: pip install -e '.[dev]' for tests
-uvicorn app:app            # serves web + API on http://localhost:8000
-blog --help                # the CLI for the author
-python -m surfaces.mcp_server   # the MCP server (stdio) for AI agents
+uv sync                          # create .venv and install deps (+ dev group)
+uv run uvicorn app:app           # serves web + API on http://localhost:8000
+uv run blog --help               # the CLI for the author
+uv run python -m surfaces.mcp_server   # the MCP server (stdio) for AI agents
+uv run pytest                    # run the tests
+uv run ruff check .              # lint
 ```
 
 The MCP server exposes one tool per core operation (`list_posts`, `get_post`,

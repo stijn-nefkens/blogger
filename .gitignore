@@ -5,3 +5,7 @@ index.sqlite
 __pycache__/
 *.pyc
 .pytest_cache/
+.ruff_cache/
+
+# uv-managed virtualenv (uv.lock is committed; the venv is not)
+.venv/
