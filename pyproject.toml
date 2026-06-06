@@ -6,11 +6,12 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "python-frontmatter>=1.1",
-    "markdown>=3.7",
     "typer>=0.15",
     "fastapi>=0.115",
     "uvicorn>=0.34",
     "mcp>=1.2",
+    "py-yaml12>=0.1.0",
+    "markdown-it-py>=4.2.0",
 ]
 
 [project.scripts]
