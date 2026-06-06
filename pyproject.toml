@@ -7,7 +7,12 @@ dependencies = [
     "python-frontmatter",
     "markdown",
     "typer",
+    "fastapi",
+    "uvicorn",
 ]
+
+[project.optional-dependencies]
+dev = ["pytest", "httpx"]
 
 [project.scripts]
 blog = "surfaces.cli:app"
