@@ -6,7 +6,11 @@ requires-python = ">=3.11"
 dependencies = [
     "python-frontmatter",
     "markdown",
+    "typer",
 ]
+
+[project.scripts]
+blog = "surfaces.cli:app"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
