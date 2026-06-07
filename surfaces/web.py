@@ -47,8 +47,7 @@ def post_page(slug: str):
         f"<h1>{html.escape(post.title)}</h1>\n"
         f'<div class="post-meta">{meta}</div>\n'
         f'<div class="post-body">{render.render_post(post)}</div>\n'
-        "</article>\n"
-        '<a class="back" href="/">← All posts</a>'
+        "</article>"
     )
     return HTMLResponse(_layout(post.title, inner, description=post.description))
 
@@ -99,13 +98,12 @@ def _layout(title: str, inner: str, description: str | None = None) -> str:
         f"<style>{_STYLE}</style>\n"
         "</head>\n<body>\n"
         '<header class="site-header wrap">'
-        '<a class="brand" href="/">Blog</a>'
-        '<nav class="site-nav"><a href="/feed.xml">RSS</a></nav>'
+        '<a class="home-link" href="/">← All posts</a>'
         "</header>\n"
         f'<main class="wrap">\n{inner}\n</main>\n'
         '<footer class="site-footer">'
         '<div class="site-footer-inner wrap">'
-        "<span>Plain Markdown files on disk.</span>"
+        '<span class="tagline">Plain Markdown files on disk.</span>'
         '<a href="/feed.xml">RSS feed</a>'
         "</div>"
         "</footer>\n"
@@ -214,15 +212,11 @@ a:hover { text-decoration: underline; }
 h1, h2, h3 { line-height: 1.25; letter-spacing: -0.02em; }
 
 .site-header {
-  display: flex; align-items: baseline; justify-content: space-between;
-  gap: 1rem; padding-top: 1.75rem; padding-bottom: 1.25rem;
+  display: flex; align-items: baseline;
+  gap: 1rem; padding-top: 1.5rem; padding-bottom: 1.25rem;
 }
-.brand {
-  font-weight: 650; font-size: 1.05rem; letter-spacing: -0.01em;
-  color: var(--text);
-}
-.brand:hover { color: var(--accent); text-decoration: none; }
-.site-nav a { color: var(--muted); font-size: 0.9rem; }
+.home-link { color: var(--muted); font-size: 0.9rem; }
+.home-link:hover { color: var(--accent); text-decoration: none; }
 
 /* Bottom padding clears the fixed footer so it never covers the last content. */
 main { padding-top: 1.5rem; padding-bottom: 5rem; }
@@ -278,8 +272,6 @@ pre {
 }
 pre code { background: none; padding: 0; font-size: 0.875rem; }
 
-.back { display: inline-block; margin-top: 3rem; color: var(--muted); }
-.back:hover { color: var(--accent); }
 .empty { color: var(--muted); }
 
 /* Fixed to the viewport bottom so it stays visible while scrolling long posts. */
@@ -288,11 +280,16 @@ pre code { background: none; padding: 0; font-size: 0.875rem; }
   background: var(--bg); border-top: 1px solid var(--border);
 }
 .site-footer-inner {
-  display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  display: flex; justify-content: space-between; gap: 1rem;
   padding-top: 0.7rem; padding-bottom: 0.7rem;
   color: var(--muted); font-size: 0.85rem;
 }
 .site-footer-inner a { color: var(--muted); }
+/* Keep the fixed footer to one short line on small screens: drop the tagline. */
+@media (max-width: 30rem) {
+  .site-footer-inner { justify-content: flex-end; }
+  .site-footer-inner .tagline { display: none; }
+}
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
