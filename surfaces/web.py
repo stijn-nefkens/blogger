@@ -12,6 +12,7 @@ http://localhost:8000) so the feed carries absolute URLs.
 
 from __future__ import annotations
 
+import base64
 import html
 import os
 from datetime import date, datetime, timezone
@@ -25,12 +26,23 @@ from core.models import Post
 
 router = APIRouter()
 
+SITE_NAME = "Blog"
+
+# A tiny inline favicon (coral rounded square with a cream "b") so the tab isn't
+# blank — base64 to avoid data-URI escaping pitfalls. No file to serve.
+_FAVICON = "data:image/svg+xml;base64," + base64.b64encode(
+    b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+    b'<rect width="32" height="32" rx="7" fill="#c2603d"/>'
+    b'<text x="16" y="23" text-anchor="middle" font-family="sans-serif"'
+    b' font-size="20" font-weight="700" fill="#faf9f5">b</text></svg>'
+).decode()
+
 
 @router.get("/", response_class=HTMLResponse)
 def index():
     posts = store.list_posts(status="published", as_of=store.today_utc())
     inner = '<h1 class="sr-only">Blog</h1>\n' + _post_list(posts)
-    return HTMLResponse(_layout("Blog", inner))
+    return HTMLResponse(_layout(SITE_NAME, inner, back=False))
 
 
 @router.get("/posts/{slug}", response_class=HTMLResponse)
@@ -82,24 +94,31 @@ def feed():
 # --- HTML helpers ------------------------------------------------------------
 
 
-def _layout(title: str, inner: str, description: str | None = None) -> str:
+def _layout(title: str, inner: str, description: str | None = None, back: bool = True) -> str:
     meta = (
         f'<meta name="description" content="{html.escape(description)}">\n'
         if description
         else ""
     )
+    # Tab title: "<page> — Blog", but don't repeat the name on the home page.
+    page_title = title if title == SITE_NAME else f"{title} — {SITE_NAME}"
+    # Header shows a back link on posts/tag pages, the site name on the listing.
+    header_nav = (
+        '<a class="home-link" href="/">← All posts</a>'
+        if back
+        else f'<span class="brand">{SITE_NAME}</span>'
+    )
     return (
         '<!doctype html>\n<html lang="en">\n<head>\n'
         '<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
-        f"<title>{html.escape(title)}</title>\n"
+        f"<title>{html.escape(page_title)}</title>\n"
         f"{meta}"
+        f'<link rel="icon" href="{_FAVICON}">\n'
         '<link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">\n'
         f"<style>{_STYLE}</style>\n"
         "</head>\n<body>\n"
-        '<header class="site-header wrap">'
-        '<a class="home-link" href="/">← All posts</a>'
-        "</header>\n"
+        f'<header class="site-header wrap">{header_nav}</header>\n'
         f'<main class="wrap">\n{inner}\n</main>\n'
         '<footer class="site-footer">'
         '<div class="site-footer-inner wrap">'
@@ -217,6 +236,7 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -0.02em; }
 }
 .home-link { color: var(--muted); font-size: 0.9rem; }
 .home-link:hover { color: var(--accent); text-decoration: none; }
+.brand { font-weight: 650; font-size: 1.05rem; letter-spacing: -0.01em; color: var(--text); }
 
 /* Bottom padding clears the fixed footer so it never covers the last content. */
 main { padding-top: 1.5rem; padding-bottom: 5rem; }
@@ -255,6 +275,11 @@ article h1 { font-size: 2.1rem; margin: 0.25rem 0 0.5rem; }
 .post-body li { margin: 0.3rem 0; }
 .post-body a { text-decoration: underline; text-underline-offset: 2px; }
 .post-body img { max-width: 100%; height: auto; border-radius: 8px; }
+.post-body figure { margin: 1.8rem 0; text-align: center; }
+.post-body figure img { border: 1px solid var(--border); }
+.post-body figcaption {
+  margin-top: 0.5rem; font-size: 0.82rem; font-style: italic; color: var(--muted);
+}
 .post-body blockquote {
   margin: 1.5rem 0; padding: 0.2rem 1.1rem;
   border-left: 3px solid var(--accent); color: var(--muted); font-style: italic;

@@ -55,6 +55,24 @@ def test_post_body_renders_static_image(client):
     _create(client, "Memey", body="![a meme](/static/memes/memey.png)")
     html = client.get("/posts/memey").text
     assert '<img src="/static/memes/memey.png" alt="a meme" />' in html
+    assert "<figcaption>a meme</figcaption>" in html  # alt becomes a caption
+
+
+def test_home_header_shows_site_name_not_a_back_link(client):
+    html = client.get("/").text
+    assert '<span class="brand">Blog</span>' in html
+    assert "← All posts" not in html  # no link pointing at the page you're on
+
+
+def test_post_header_has_back_link_and_title_suffix(client):
+    _create(client, "Hello")
+    html = client.get("/posts/hello").text
+    assert '<a class="home-link" href="/">← All posts</a>' in html
+    assert "<title>Hello — Blog</title>" in html
+
+
+def test_pages_have_a_favicon(client):
+    assert 'rel="icon"' in client.get("/").text
 
 
 def test_post_page_renders_tags_as_links(client):
