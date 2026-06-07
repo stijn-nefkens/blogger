@@ -103,9 +103,11 @@ def _layout(title: str, inner: str, description: str | None = None) -> str:
         '<nav class="site-nav"><a href="/feed.xml">RSS</a></nav>'
         "</header>\n"
         f'<main class="wrap">\n{inner}\n</main>\n'
-        '<footer class="site-footer wrap">'
+        '<footer class="site-footer">'
+        '<div class="site-footer-inner wrap">'
         "<span>Plain Markdown files on disk.</span>"
         '<a href="/feed.xml">RSS feed</a>'
+        "</div>"
         "</footer>\n"
         "</body>\n</html>\n"
     )
@@ -202,11 +204,6 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* Sticky footer: fill at least the viewport so the footer sits at the bottom
-     on short pages instead of floating mid-screen. */
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 .wrap {
   width: 100%; max-width: var(--maxw); margin: 0 auto;
@@ -227,7 +224,8 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -0.02em; }
 .brand:hover { color: var(--accent); text-decoration: none; }
 .site-nav a { color: var(--muted); font-size: 0.9rem; }
 
-main { padding-top: 1.5rem; padding-bottom: 4rem; flex: 1 0 auto; }
+/* Bottom padding clears the fixed footer so it never covers the last content. */
+main { padding-top: 1.5rem; padding-bottom: 5rem; }
 
 .page-title { font-size: 1.9rem; margin: 0.25rem 0 2rem; }
 
@@ -284,13 +282,17 @@ pre code { background: none; padding: 0; font-size: 0.875rem; }
 .back:hover { color: var(--accent); }
 .empty { color: var(--muted); }
 
+/* Fixed to the viewport bottom so it stays visible while scrolling long posts. */
 .site-footer {
-  display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
-  flex-shrink: 0;
-  border-top: 1px solid var(--border); margin-top: 2rem;
-  padding-top: 1.5rem; padding-bottom: 2.5rem; color: var(--muted); font-size: 0.85rem;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: var(--bg); border-top: 1px solid var(--border);
 }
-.site-footer a { color: var(--muted); }
+.site-footer-inner {
+  display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  padding-top: 0.7rem; padding-bottom: 0.7rem;
+  color: var(--muted); font-size: 0.85rem;
+}
+.site-footer-inner a { color: var(--muted); }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
