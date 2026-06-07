@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import os
 import sqlite3
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 from core.models import Post
@@ -83,10 +85,21 @@ def _db_path() -> Path:
     return Path(os.environ.get("BLOG_INDEX_PATH", "index.sqlite"))
 
 
-def _connect() -> sqlite3.Connection:
+@contextmanager
+def _connect() -> Iterator[sqlite3.Connection]:
+    """Open a connection, commit on success, and always close it.
+
+    Closing matters: a lingering connection keeps the SQLite file open, which on
+    Windows prevents deleting/rebuilding index.sqlite (and leaks handles
+    everywhere). sqlite3's own `with conn` only commits — it never closes.
+    """
     conn = sqlite3.connect(_db_path())
-    conn.execute(_SCHEMA)
-    return conn
+    try:
+        conn.execute(_SCHEMA)
+        yield conn
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def _insert(conn: sqlite3.Connection, post: Post) -> None:
