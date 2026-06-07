@@ -40,3 +40,23 @@ def test_render_post_excludes_frontmatter():
     assert "slug" not in html
     assert "my-first-post" not in html
     assert "status" not in html
+
+
+def test_lone_image_becomes_a_captioned_figure():
+    html = render.render("![a quest log meme](/static/memes/x.svg)")
+    assert "<figure>" in html
+    assert '<img src="/static/memes/x.svg" alt="a quest log meme" />' in html
+    assert "<figcaption>a quest log meme</figcaption>" in html
+    assert "<p><img" not in html  # the wrapping paragraph is gone
+
+
+def test_lone_image_without_alt_has_no_caption():
+    html = render.render("![](/static/memes/x.svg)")
+    assert "<figure>" in html
+    assert "<figcaption>" not in html
+
+
+def test_inline_image_with_text_is_left_alone():
+    html = render.render("see this ![alt](/x.png) right here")
+    assert "<figure>" not in html
+    assert "<p>" in html
