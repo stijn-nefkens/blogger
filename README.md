@@ -44,6 +44,22 @@ from `posts/`; deleting it loses nothing (`blog reindex` repopulates it).
 | `BLOG_BASE_URL`    | `http://localhost:8000` | Absolute base URL used in the RSS feed.    |
 | `BLOG_WRITE_TOKEN` | _(unset)_               | Shared secret required for HTTP API writes. |
 
+## Scheduling posts
+
+The frontmatter `date` is the **publish date**. A post with `status: published`
+and a `date` in the future is *scheduled*: it stays hidden from every public
+surface (listing, tag pages, single post, `/feed.xml`, public API, search) until
+that day, then appears automatically — no cron, daemon, or restart, because
+visibility is computed per request.
+
+The cutoff is **today in UTC**. Authoring surfaces (CLI, MCP) always see
+scheduled posts, so an agent that schedules one still finds it. Set the date when
+creating:
+
+```sh
+blog create --title "..." --description "..." --body "..." --status published --date 2026-12-25
+```
+
 ## Authorization
 
 Reads are public. HTTP API writes (`POST/PATCH/DELETE`) require the bearer token:

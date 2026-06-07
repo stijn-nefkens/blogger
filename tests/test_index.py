@@ -24,13 +24,11 @@ def test_search_finds_by_title_description_body_and_tags():
     assert [p.slug for p in store.search("outdoors")] == ["garden-log"]     # tags
 
 
-def test_search_is_case_insensitive_and_newest_first(monkeypatch):
+def test_search_is_case_insensitive_and_newest_first():
     from datetime import date
 
-    monkeypatch.setattr(store, "date", _FixedDate(date(2024, 1, 1)))
-    store.create_post("Older Note", "d", "shared keyword here")
-    monkeypatch.setattr(store, "date", _FixedDate(date(2026, 1, 1)))
-    store.create_post("Newer Note", "d", "SHARED keyword too")
+    store.create_post("Older Note", "d", "shared keyword here", date=date(2024, 1, 1))
+    store.create_post("Newer Note", "d", "SHARED keyword too", date=date(2026, 1, 1))
 
     assert [p.slug for p in store.search("KEYWORD")] == ["newer-note", "older-note"]
 
@@ -95,11 +93,3 @@ def test_rebuild_if_missing_keeps_existing_data(isolated):
     assert len(store.search("keepterm")) == 1
     index.rebuild_if_missing()  # file present -> no-op, data intact
     assert len(store.search("keepterm")) == 1
-
-
-class _FixedDate:
-    def __init__(self, today):
-        self._today = today
-
-    def today(self):
-        return self._today

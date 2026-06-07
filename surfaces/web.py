@@ -28,14 +28,14 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 def index():
-    posts = store.list_posts(status="published")
+    posts = store.list_posts(status="published", as_of=store.today_utc())
     inner = '<h1 class="sr-only">Blog</h1>\n' + _post_list(posts)
     return HTMLResponse(_layout("Blog", inner))
 
 
 @router.get("/posts/{slug}", response_class=HTMLResponse)
 def post_page(slug: str):
-    post = store.get_post(slug)
+    post = store.get_post(slug, as_of=store.today_utc())
     if post is None:
         raise HTTPException(status_code=404, detail="post not found")
     meta = f'<time datetime="{post.date.isoformat()}">{_human_date(post.date)}</time>'
@@ -55,7 +55,7 @@ def post_page(slug: str):
 
 @router.get("/tags/{tag}", response_class=HTMLResponse)
 def tag_page(tag: str):
-    posts = store.list_posts(status="published", tag=tag)
+    posts = store.list_posts(status="published", tag=tag, as_of=store.today_utc())
     heading = f"Posts tagged #{html.escape(tag)}"
     inner = f'<h1 class="page-title">{heading}</h1>\n' + _post_list(posts)
     return HTMLResponse(_layout(f"#{tag}", inner))
@@ -64,7 +64,7 @@ def tag_page(tag: str):
 @router.get("/feed.xml")
 def feed():
     base = _base_url()
-    posts = store.list_posts(status="published")
+    posts = store.list_posts(status="published", as_of=store.today_utc())
     last = _rfc822(posts[0].date if posts else date.today())
     items = "".join(_feed_item(p, base) for p in posts)
     xml = (

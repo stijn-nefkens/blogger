@@ -14,7 +14,7 @@ from __future__ import annotations
 import dataclasses
 import os
 import secrets
-from datetime import date
+from datetime import date as date_  # aliased so a field named `date` can be typed as one
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
@@ -48,8 +48,8 @@ class PostOut(BaseModel):
     title: str
     slug: str
     description: str
-    date: date
-    updated: date
+    date: date_
+    updated: date_
     status: str
     tags: list[str]
     body: str
@@ -61,6 +61,7 @@ class CreateIn(BaseModel):
     body: str
     tags: list[str] = []
     status: str = "draft"
+    date: date_ | None = None  # publish date; a future date schedules the post
 
 
 class UpdateIn(BaseModel):
@@ -76,21 +77,27 @@ class StatusIn(BaseModel):
 
 
 # --- reads (public) ----------------------------------------------------------
+# Public reads gate scheduled posts (as_of=today, UTC): a future-dated post is
+# invisible until its day. Write endpoints below stay ungated so the author can
+# still manage scheduled posts.
 
 
 @router.get("/posts", response_model=list[PostOut])
 def list_posts(status: str | None = None, tag: str | None = None):
-    return [_out(p) for p in store.list_posts(status=status, tag=tag)]
+    return [_out(p) for p in store.list_posts(status=status, tag=tag, as_of=store.today_utc())]
 
 
 @router.get("/posts/{slug}", response_model=PostOut)
 def get_post(slug: str):
-    return _out(_get_or_404(slug))
+    post = store.get_post(slug, as_of=store.today_utc())
+    if post is None:
+        raise HTTPException(status_code=404, detail="no such post")
+    return _out(post)
 
 
 @router.get("/search", response_model=list[PostOut])
 def search(q: str):
-    return [_out(p) for p in store.search(q)]
+    return [_out(p) for p in store.search(q, as_of=store.today_utc())]
 
 
 # --- writes (token required) -------------------------------------------------
@@ -100,7 +107,8 @@ def search(q: str):
 def create_post(data: CreateIn):
     try:
         post = store.create_post(
-            data.title, data.description, data.body, tags=data.tags, status=data.status
+            data.title, data.description, data.body,
+            tags=data.tags, status=data.status, date=data.date,
         )
     except ValueError as exc:  # duplicate slug
         raise HTTPException(status_code=409, detail=str(exc))

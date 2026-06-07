@@ -14,6 +14,7 @@ surfaces/api.py uses.
 from __future__ import annotations
 
 import dataclasses
+from datetime import date as _date
 
 from mcp.server.fastmcp import FastMCP
 
@@ -46,12 +47,20 @@ def create_post(
     body: str,
     tags: list[str] | None = None,
     status: str = "draft",
+    date: str | None = None,
 ) -> dict:
     """Create a new post. The slug is derived from the title and is permanent, so
     choose the title carefully. `description` is a required one-line summary used
     in listings and the feed. `body` is Markdown. New posts default to "draft";
-    pass status="published" to publish immediately."""
-    return _post(store.create_post(title, description, body, tags=tags, status=status))
+    pass status="published" to publish immediately.
+
+    To schedule a post, set status="published" and `date` to a future day
+    (YYYY-MM-DD): it stays hidden from the public site until that date, in UTC.
+    `date` defaults to today (UTC) when omitted."""
+    when = _date.fromisoformat(date) if date else None
+    return _post(
+        store.create_post(title, description, body, tags=tags, status=status, date=when)
+    )
 
 
 @mcp.tool()
