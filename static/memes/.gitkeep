@@ -1,0 +1,2 @@
+# Committed images (e.g. post memes) are served at /static.
+# Keeps the directory present in a fresh checkout; safe to delete once images exist.
