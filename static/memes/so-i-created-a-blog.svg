@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="'DejaVu Sans Mono', 'Courier New', monospace">
+  <rect width="900" height="620" fill="#101222"/>
+  <rect x="18" y="18" width="864" height="584" fill="none" stroke="#f0c850" stroke-width="4"/>
+  <rect x="28" y="28" width="844" height="564" fill="none" stroke="#5a4b1e" stroke-width="2"/>
+  <text x="450" y="88" text-anchor="middle" font-size="40" font-weight="bold" fill="#f0c850">QUEST LOG</text>
+  <text x="60" y="155" font-size="28" font-weight="bold" fill="#f0c850">MAIN QUEST</text>
+  <text x="60" y="200" font-size="26" fill="#ebebe1">&gt; Day job</text>
+  <text x="92" y="240" font-size="22" fill="#9696a0">status: partially delegated to AI</text>
+  <text x="60" y="300" font-size="28" font-weight="bold" fill="#f0c850">SIDE QUESTS (47 active)</text>
+  <text x="60" y="345" font-size="26" fill="#78dc78">&gt; Build a blog engine</text>
+  <text x="540" y="345" font-size="26" fill="#78dc78">[DONE]</text>
+  <text x="60" y="390" font-size="26" fill="#6ec8f0">&gt; Write the first post</text>
+  <text x="540" y="390" font-size="26" fill="#6ec8f0">[IN PROGRESS]</text>
+  <text x="60" y="435" font-size="26" fill="#ebebe1">&gt; Blog about side quests</text>
+  <text x="92" y="475" font-size="22" fill="#9696a0">warning: completing this quest</text>
+  <text x="92" y="510" font-size="22" fill="#9696a0">unlocks more side quests</text>
+  <text x="60" y="565" font-size="26" font-weight="bold" fill="#ff7878">NEW QUEST UNLOCKED!</text>
+</svg>
