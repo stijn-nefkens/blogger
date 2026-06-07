@@ -46,6 +46,26 @@ def test_get_missing_fails():
     assert "no such post" in result.output
 
 
+def test_create_with_date_schedules_post():
+    from datetime import timedelta
+
+    from core import store
+
+    tomorrow = (store.today_utc() + timedelta(days=1)).isoformat()
+    assert run("create", "--title", "Scheduled", "--description", "d",
+               "--body", "b", "--status", "published", "--date", tomorrow).exit_code == 0
+    # CLI is an authoring surface: it lists the scheduled post.
+    assert "scheduled" in run("list").output
+    assert store.get_post("scheduled").date.isoformat() == tomorrow
+
+
+def test_create_with_bad_date_fails():
+    result = run("create", "--title", "Bad", "--description", "d",
+                 "--body", "b", "--date", "not-a-date")
+    assert result.exit_code == 1
+    assert "invalid date" in result.output
+
+
 def test_publish_and_unpublish_filter_in_list():
     run("create", "--title", "Toggle", "--description", "d", "--body", "b")
     assert "toggle" not in run("list", "--status", "published").output

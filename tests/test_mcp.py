@@ -93,6 +93,17 @@ def test_create_via_protocol_call_tool(isolated):
     assert store.get_post("via-protocol").status == "published"
 
 
+def test_create_with_future_date_schedules_but_authoring_still_sees_it():
+    from datetime import timedelta
+
+    tomorrow = (store.today_utc() + timedelta(days=1)).isoformat()
+    post = srv.create_post("Mcp Sched", "d", "body", status="published", date=tomorrow)
+    assert post["date"] == tomorrow
+    assert post["updated"] == tomorrow
+    # MCP is an authoring surface: the agent must still see what it scheduled.
+    assert "mcp-sched" in {p["slug"] for p in srv.list_posts()}
+
+
 def test_main_rebuilds_missing_index_on_startup(isolated, tmp_path, monkeypatch):
     """A fresh environment has no index; startup must rebuild it from posts/ so
     the agent's first search isn't empty."""

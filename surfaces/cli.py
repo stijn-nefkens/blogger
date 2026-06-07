@@ -7,6 +7,8 @@ already controls (see CLAUDE.md Part 10).
 
 from __future__ import annotations
 
+from datetime import date as date_
+
 import typer
 
 from core import index, store
@@ -41,9 +43,13 @@ def create(
     body: str = typer.Option(..., help="Post body in Markdown."),
     tag: list[str] = typer.Option(None, "--tag", help="Repeat to add multiple tags."),
     status: str = typer.Option("draft", help="draft or published."),
+    date: str = typer.Option(
+        None, help="Publish date YYYY-MM-DD; a future date schedules the post. Defaults to today (UTC)."
+    ),
 ) -> None:
     """Create a new post."""
-    post = _try(store.create_post, title, description, body, tags=tag, status=status)
+    when = _parse_date(date) if date else None
+    post = _try(store.create_post, title, description, body, tags=tag, status=status, date=when)
     typer.echo(f"created {post.slug}")
 
 
@@ -127,6 +133,13 @@ def _try(fn, *args, **kwargs):
         return fn(*args, **kwargs)
     except ValueError as exc:
         _fail(str(exc))
+
+
+def _parse_date(value: str) -> date_:
+    try:
+        return date_.fromisoformat(value)
+    except ValueError:
+        _fail(f"invalid date '{value}'; use YYYY-MM-DD")
 
 
 if __name__ == "__main__":

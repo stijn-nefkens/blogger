@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from core.models import Post, dump, parse, slugify
@@ -20,18 +20,34 @@ from core import index
 logger = logging.getLogger(__name__)
 
 # Fields a caller may change via update_post. `slug` and `date` are permanent
-# (the slug is the stable URL; the date is the creation date), so they're out.
+# (the slug is the stable URL; the date anchors the URL's year), so they're out.
 _UPDATABLE = {"title", "description", "body", "tags", "status"}
 
 
-def list_posts(status: str | None = None, tag: str | None = None) -> list[Post]:
-    """All posts, newest-first by date, optionally filtered by status and/or tag."""
+def today_utc() -> date:
+    """Today's date in UTC — the cutoff for scheduled-post visibility."""
+    return datetime.now(timezone.utc).date()
+
+
+def list_posts(
+    status: str | None = None,
+    tag: str | None = None,
+    as_of: date | None = None,
+) -> list[Post]:
+    """All posts, newest-first by date, optionally filtered.
+
+    `as_of` gates scheduled posts: when given, posts dated after it are excluded.
+    Public surfaces pass today_utc(); authoring surfaces (CLI, MCP) omit it so
+    they still see future-dated posts.
+    """
     posts = []
     for path in _posts_dir().glob("*/*.md"):
         post = parse(path.read_text(encoding="utf-8"))
         if status is not None and post.status != status:
             continue
         if tag is not None and tag not in post.tags:
+            continue
+        if as_of is not None and post.date > as_of:
             continue
         posts.append(post)
     # Newest-first by date, with slug as a stable tiebreaker for same-date posts.
@@ -40,12 +56,16 @@ def list_posts(status: str | None = None, tag: str | None = None) -> list[Post]:
     return posts
 
 
-def get_post(slug: str) -> Post | None:
-    """The post with this slug, or None if it doesn't exist."""
+def get_post(slug: str, as_of: date | None = None) -> Post | None:
+    """The post with this slug, or None if it doesn't exist (or, when `as_of` is
+    given, if it's scheduled for after that date)."""
     path = _find_path(slug)
     if path is None:
         return None
-    return parse(path.read_text(encoding="utf-8"))
+    post = parse(path.read_text(encoding="utf-8"))
+    if as_of is not None and post.date > as_of:
+        return None
+    return post
 
 
 def create_post(
@@ -54,18 +74,24 @@ def create_post(
     body: str,
     tags: list[str] | None = None,
     status: str = "draft",
+    date: date | None = None,
 ) -> Post:
-    """Create a new post. The slug is derived from the title and must be unique."""
+    """Create a new post. The slug is derived from the title and must be unique.
+
+    `date` is the publish date (defaults to today, UTC); a future date schedules
+    the post — it stays hidden from public surfaces until that day. It also picks
+    the posts/<year>/ folder.
+    """
     slug = slugify(title)
     if _find_path(slug) is not None:
         raise ValueError(f"a post with slug '{slug}' already exists")
-    today = date.today()
+    when = date if date is not None else today_utc()
     post = Post(
         title=title,
         slug=slug,
         description=description,
-        date=today,
-        updated=today,
+        date=when,
+        updated=when,
         status=status,
         tags=list(tags or []),
         body=body,
@@ -84,7 +110,7 @@ def update_post(slug: str, **fields) -> Post:
         raise ValueError(f"no such post: {slug}")
     for key, value in fields.items():
         setattr(post, key, value)
-    post.updated = date.today()
+    post.updated = today_utc()
     _write(post)
     return post
 
@@ -103,9 +129,15 @@ def set_status(slug: str, status: str) -> Post:
     return update_post(slug, status=status)
 
 
-def search(query: str) -> list[Post]:
-    """Posts matching the query, via the SQLite index, newest-first."""
-    return index.search(query)
+def search(query: str, as_of: date | None = None) -> list[Post]:
+    """Posts matching the query, via the SQLite index, newest-first.
+
+    `as_of` gates scheduled posts the same way list_posts does.
+    """
+    posts = index.search(query)
+    if as_of is not None:
+        posts = [p for p in posts if p.date <= as_of]
+    return posts
 
 
 # --- internals ---------------------------------------------------------------

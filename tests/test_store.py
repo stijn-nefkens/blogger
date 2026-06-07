@@ -59,11 +59,11 @@ def test_create_rejects_duplicate_slug(posts_dir):
 def test_update_changes_fields_and_bumps_updated(posts_dir, monkeypatch):
     from datetime import date
 
-    created = store.create_post("To Edit", "old desc", "old body")
+    created = store.create_post("To Edit", "old desc", "old body", date=date(2020, 1, 1))
 
     # Force a later "today" so the updated bump is observable.
     later = date(2999, 1, 1)
-    monkeypatch.setattr(store, "date", _FixedDate(later))
+    monkeypatch.setattr(store, "today_utc", lambda: later)
 
     edited = store.update_post(
         "to-edit", description="new desc", body="new body", status="published"
@@ -116,13 +116,11 @@ def test_list_is_empty_initially(posts_dir):
     assert store.list_posts() == []
 
 
-def test_list_returns_newest_first(posts_dir, monkeypatch):
+def test_list_returns_newest_first(posts_dir):
     from datetime import date
 
-    monkeypatch.setattr(store, "date", _FixedDate(date(2024, 1, 1)))
-    store.create_post("Older", "d", "b")
-    monkeypatch.setattr(store, "date", _FixedDate(date(2026, 1, 1)))
-    store.create_post("Newer", "d", "b")
+    store.create_post("Older", "d", "b", date=date(2024, 1, 1))
+    store.create_post("Newer", "d", "b", date=date(2026, 1, 1))
 
     slugs = [p.slug for p in store.list_posts()]
     assert slugs == ["newer", "older"]
@@ -158,13 +156,3 @@ def test_delete_succeeds_when_the_index_is_unwritable(posts_dir, monkeypatch):
     store.delete_post("goner")  # must not raise despite the broken index
 
     assert store.get_post("goner") is None
-
-
-class _FixedDate:
-    """Stand-in for the `date` module used inside store, with a fixed today()."""
-
-    def __init__(self, today):
-        self._today = today
-
-    def today(self):
-        return self._today
