@@ -8,12 +8,16 @@ posts/<year>/<slug>.md, where <year> comes from the post's created date.
 
 from __future__ import annotations
 
+import logging
 import os
+import sqlite3
 from datetime import date
 from pathlib import Path
 
 from core.models import Post, dump, parse, slugify
 from core import index
+
+logger = logging.getLogger(__name__)
 
 # Fields a caller may change via update_post. `slug` and `date` are permanent
 # (the slug is the stable URL; the date is the creation date), so they're out.
@@ -90,8 +94,8 @@ def delete_post(slug: str) -> None:
     path = _find_path(slug)
     if path is None:
         raise ValueError(f"no such post: {slug}")
-    path.unlink()
-    index.remove_post(slug)
+    path.unlink()  # files first...
+    _try_index(lambda: index.remove_post(slug))  # ...then the cache
 
 
 def set_status(slug: str, status: str) -> Post:
@@ -115,7 +119,20 @@ def _write(post: Post) -> None:
     path = _posts_dir() / str(post.date.year) / f"{post.slug}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(dump(post), encoding="utf-8")  # files first...
-    index.index_post(post)  # ...then the cache
+    _try_index(lambda: index.index_post(post))  # ...then the cache
+
+
+def _try_index(update) -> None:
+    """Run a cache update, but never let a cache failure fail a file operation.
+
+    Files are the source of truth and the index is a disposable cache (the next
+    reindex heals it), so a SQLite error here — e.g. a virtualized/network mount
+    SQLite can't lock — must not undo a write that already hit disk.
+    """
+    try:
+        update()
+    except sqlite3.OperationalError as exc:
+        logger.warning("index update skipped; will heal on next reindex: %s", exc)
 
 
 def _find_path(slug: str) -> Path | None:

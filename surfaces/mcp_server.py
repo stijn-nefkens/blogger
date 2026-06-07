@@ -17,7 +17,7 @@ import dataclasses
 
 from mcp.server.fastmcp import FastMCP
 
-from core import store
+from core import index, store
 from core.models import Post
 
 mcp = FastMCP("blog")
@@ -112,5 +112,13 @@ def _post(post: Post) -> dict:
     return data
 
 
-if __name__ == "__main__":
+def main() -> None:
+    # Rebuild the disposable index if it's missing (fresh environment), so an
+    # agent's first `search` finds published posts instead of nothing — same
+    # behavior app.py gives the web/API process.
+    index.rebuild_if_missing()
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()
