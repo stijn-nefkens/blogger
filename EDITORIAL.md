@@ -23,6 +23,15 @@ If a sentence is unusual but works, it stays.
 - No fixed template or target length: formatting adapts to the content.
 - Headings, lists, and code blocks only when the content calls for them.
 
+## Memes
+
+- Every post is accompanied by one fitting meme, chosen or made by the editor.
+- The meme is part of the draft: the author approves it together with the
+  text, and can veto or swap it.
+- Embedded with standard Markdown image syntax and a descriptive alt text.
+  Image files live in the repo under `static/memes/<slug>.<ext>` so the
+  content stays self-contained — no third-party image hosts.
+
 ## Metadata
 
 - The editor supplies title (unless the author gave one), description (the
@@ -33,7 +42,8 @@ If a sentence is unusual but works, it stays.
 ## Workflow
 
 1. Author sends raw text (and optionally a title, tags, or a publish date).
-2. Editor copy-edits and shows the full draft to the author in chat.
+2. Editor copy-edits, picks the meme, and shows the full draft to the author
+   in chat.
 3. Nothing publishes without the author's explicit OK.
 4. On approval: create the post via the MCP server, push to GitHub.
 5. A future `date` (YYYY-MM-DD, UTC) schedules the post — it goes live on
