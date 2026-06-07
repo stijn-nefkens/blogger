@@ -138,6 +138,28 @@ def test_list_filters_by_status_and_tag(posts_dir):
     assert {p.slug for p in store.list_posts(status="published", tag="y")} == {"other"}
 
 
+def test_create_succeeds_when_the_index_is_unwritable(posts_dir, monkeypatch):
+    """The index is a disposable cache; a SQLite failure must not fail a write
+    whose .md file already hit disk (files win)."""
+    # A path under a non-existent directory makes sqlite raise OperationalError.
+    monkeypatch.setenv("BLOG_INDEX_PATH", str(posts_dir / "nope" / "index.sqlite"))
+
+    post = store.create_post("Resilient", "still works", "body")
+
+    assert post.slug == "resilient"
+    assert (posts_dir / str(post.date.year) / "resilient.md").exists()
+    assert store.get_post("resilient").title == "Resilient"  # file is authoritative
+
+
+def test_delete_succeeds_when_the_index_is_unwritable(posts_dir, monkeypatch):
+    monkeypatch.setenv("BLOG_INDEX_PATH", str(posts_dir / "nope" / "index.sqlite"))
+    store.create_post("Goner", "d", "b")
+
+    store.delete_post("goner")  # must not raise despite the broken index
+
+    assert store.get_post("goner") is None
+
+
 class _FixedDate:
     """Stand-in for the `date` module used inside store, with a fixed today()."""
 

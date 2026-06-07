@@ -91,3 +91,15 @@ def test_create_via_protocol_call_tool(isolated):
     data = json.loads(content[0].text)
     assert data["slug"] == "via-protocol"
     assert store.get_post("via-protocol").status == "published"
+
+
+def test_main_rebuilds_missing_index_on_startup(isolated, tmp_path, monkeypatch):
+    """A fresh environment has no index; startup must rebuild it from posts/ so
+    the agent's first search isn't empty."""
+    srv.create_post("Indexed", "d", "findme", status="published")
+    (tmp_path / "index.sqlite").unlink()
+
+    monkeypatch.setattr(srv.mcp, "run", lambda *a, **k: None)  # don't block on stdio
+    srv.main()
+
+    assert [p["slug"] for p in srv.search("findme")] == ["indexed"]
