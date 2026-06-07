@@ -1,0 +1,22 @@
+# Never ship the local virtualenv — it's platform-specific and rebuilt in-image
+.venv
+
+# Version control + caches
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+.ruff_cache
+.mypy_cache
+.pytest_cache
+
+# The disposable search index — rebuilt from posts/, never bake it in
+index.sqlite
+
+# Local env / editor noise
+.env
+.env.*
+.vscode
+.idea
+.DS_Store
