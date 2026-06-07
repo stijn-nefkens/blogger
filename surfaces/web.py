@@ -275,11 +275,6 @@ article h1 { font-size: 2.1rem; margin: 0.25rem 0 0.5rem; }
 .post-body li { margin: 0.3rem 0; }
 .post-body a { text-decoration: underline; text-underline-offset: 2px; }
 .post-body img { max-width: 100%; height: auto; border-radius: 8px; }
-.post-body figure { margin: 1.8rem 0; text-align: center; }
-.post-body figure img { border: 1px solid var(--border); }
-.post-body figcaption {
-  margin-top: 0.5rem; font-size: 0.82rem; font-style: italic; color: var(--muted);
-}
 .post-body blockquote {
   margin: 1.5rem 0; padding: 0.2rem 1.1rem;
   border-left: 3px solid var(--accent); color: var(--muted); font-style: italic;
