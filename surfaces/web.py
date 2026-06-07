@@ -202,6 +202,11 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Sticky footer: fill at least the viewport so the footer sits at the bottom
+     on short pages instead of floating mid-screen. */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 .wrap {
   width: 100%; max-width: var(--maxw); margin: 0 auto;
@@ -222,7 +227,7 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -0.02em; }
 .brand:hover { color: var(--accent); text-decoration: none; }
 .site-nav a { color: var(--muted); font-size: 0.9rem; }
 
-main { padding-top: 1.5rem; padding-bottom: 4rem; }
+main { padding-top: 1.5rem; padding-bottom: 4rem; flex: 1 0 auto; }
 
 .page-title { font-size: 1.9rem; margin: 0.25rem 0 2rem; }
 
@@ -281,6 +286,7 @@ pre code { background: none; padding: 0; font-size: 0.875rem; }
 
 .site-footer {
   display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  flex-shrink: 0;
   border-top: 1px solid var(--border); margin-top: 2rem;
   padding-top: 1.5rem; padding-bottom: 2.5rem; color: var(--muted); font-size: 0.85rem;
 }
