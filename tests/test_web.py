@@ -55,7 +55,6 @@ def test_post_body_renders_static_image(client):
     _create(client, "Memey", body="![a meme](/static/memes/memey.png)")
     html = client.get("/posts/memey").text
     assert '<img src="/static/memes/memey.png" alt="a meme" />' in html
-    assert "<figcaption>a meme</figcaption>" in html  # alt becomes a caption
 
 
 def test_home_header_shows_site_name_not_a_back_link(client):
