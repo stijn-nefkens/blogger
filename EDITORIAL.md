@@ -18,10 +18,13 @@ If a sentence is unusual but works, it stays.
 - If a sentence is genuinely unclear or ambiguous, ask the author — don't
   guess, don't invent.
 
-## Formatting
+## Opening quote
 
-- No fixed template or target length: formatting adapts to the content.
-- Headings, lists, and code blocks only when the content calls for them.
+- Every post opens with a fitting quote from a real person (Gandhi, Einstein,
+  whoever matches the post's theme), as a blockquote with attribution.
+- Quotes must be genuine and correctly attributed — verify before using.
+  Famous names attract misattributed quotes; if a good quote can't be
+  verified, pick another rather than spreading a fake one.
 
 ## Memes
 
@@ -42,9 +45,10 @@ If a sentence is unusual but works, it stays.
 ## Workflow
 
 1. Author sends raw text (and optionally a title, tags, or a publish date).
-2. Editor copy-edits, picks the meme, and shows the full draft to the author
-   in chat.
+2. Editor copy-edits, picks the quote and the meme, and shows the full draft
+   to the author in chat.
 3. Nothing publishes without the author's explicit OK.
 4. On approval: create the post via the MCP server, push to GitHub.
-5. A future `date` (YYYY-MM-DD, UTC) schedules the post — it goes live on
-   that day by itself.
+5. No publish date given = publish immediately on approval. A future `date`
+   (YYYY-MM-DD, UTC) schedules the post instead — it goes live on that day by
+   itself.
