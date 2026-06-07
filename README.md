@@ -57,3 +57,19 @@ If `BLOG_WRITE_TOKEN` is unset, all writes are rejected. The CLI needs no auth
 
 **Deploy behind HTTPS in production** so the bearer token is never sent in
 cleartext.
+
+## Deployment
+
+The repo ships a `Dockerfile` (uv-based) that builds a runnable image: it
+installs from `uv.lock` with `--locked`, puts `.venv/bin` on `PATH`, and runs
+`uvicorn app:app --host 0.0.0.0 --port 8000`. The MCP server is local-only and
+is **not** part of the deployed process.
+
+Git is the single source of truth: posts under `posts/` are committed, and
+production runs with `BLOG_WRITE_TOKEN` **unset**, so all HTTP writes are
+rejected and the deployed instance never diverges from the repo. Authoring is
+edit → commit → push → redeploy.
+
+The search index is disposable: on startup the app rebuilds it from `posts/` if
+`BLOG_INDEX_PATH` doesn't exist, so a fresh container (empty `/data`, no volume)
+still serves a populated blog.

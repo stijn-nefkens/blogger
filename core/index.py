@@ -41,6 +41,19 @@ def rebuild() -> None:
             _insert(conn, post)
 
 
+def rebuild_if_missing() -> None:
+    """Build the cache from posts/ if the index file doesn't exist yet.
+
+    On a fresh container with an empty /data (no persisted volume), the index
+    file is absent; without this, search would return nothing until a write or
+    an explicit reindex. The index is disposable, so this simply repopulates it
+    from the source-of-truth files. If the file already exists, it's left as-is.
+    """
+    if not _db_path().exists():
+        rebuild()
+
+
+
 def index_post(post: Post) -> None:
     """Add or replace a single post in the cache (called after a file write)."""
     with _connect() as conn:

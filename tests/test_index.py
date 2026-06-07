@@ -80,6 +80,23 @@ def test_rebuild_is_idempotent():
     assert store.search("b") == first
 
 
+def test_rebuild_if_missing_builds_when_absent(isolated):
+    store.create_post("Solo", "d", "needle")
+    (isolated / "index.sqlite").unlink()
+    assert not (isolated / "index.sqlite").exists()  # mimic a fresh container
+
+    index.rebuild_if_missing()  # don't touch the index before this; connecting
+    assert (isolated / "index.sqlite").exists()      # creates the file
+    assert [p.slug for p in store.search("needle")] == ["solo"]
+
+
+def test_rebuild_if_missing_keeps_existing_data(isolated):
+    store.create_post("Keep", "d", "keepterm")
+    assert len(store.search("keepterm")) == 1
+    index.rebuild_if_missing()  # file present -> no-op, data intact
+    assert len(store.search("keepterm")) == 1
+
+
 class _FixedDate:
     def __init__(self, today):
         self._today = today
