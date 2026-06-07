@@ -51,6 +51,12 @@ def test_post_created_via_api_appears_on_web(client):
     assert '<meta name="description"' in html
 
 
+def test_post_body_renders_static_image(client):
+    _create(client, "Memey", body="![a meme](/static/memes/memey.png)")
+    html = client.get("/posts/memey").text
+    assert '<img src="/static/memes/memey.png" alt="a meme" />' in html
+
+
 def test_post_page_renders_tags_as_links(client):
     _create(client, "Tagged", tags=["python", "meta"])
     html = client.get("/posts/tagged").text
