@@ -28,12 +28,18 @@ If a sentence is unusual but works, it stays.
 
 ## Memes
 
-- Every post is accompanied by one fitting meme, chosen or made by the editor.
-- The meme is part of the draft: the author approves it together with the
-  text, and can veto or swap it.
-- Embedded with standard Markdown image syntax and a descriptive alt text.
-  Image files live in the repo under `static/memes/<slug>.<ext>` so the
-  content stays self-contained — no third-party image hosts.
+- Every post is accompanied by one fitting meme, chosen by the editor.
+- The meme is part of the draft: the author approves it with the text, and
+  can veto or swap it.
+- Memes are real GIFs hotlinked directly from Tenor (the editor finds a
+  fitting one and embeds its media URL with Markdown image syntax + alt text).
+  This is a deliberate exception to the "self-contained" principle: a hotlink
+  depends on Google's servers, but it's zero effort and the fallback below
+  turns the eventual breakage into a feature, not a bug.
+- **Graceful fallback:** if a hotlinked meme ever fails to load, the post
+  shows the line *"it appears that the blog outlived google"* in its place.
+  The blog literally announces when it has outlived a dependency — which is
+  the whole point of Goal 1.
 
 ## Metadata
 
