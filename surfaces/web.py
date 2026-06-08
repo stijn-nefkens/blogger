@@ -37,6 +37,28 @@ _FAVICON = "data:image/svg+xml;base64," + base64.b64encode(
     b' font-size="20" font-weight="700" fill="#faf9f5">b</text></svg>'
 ).decode()
 
+# Memes are hotlinked GIFs (see EDITORIAL.md), so their URLs can rot. When a
+# post-body image fails to load, swap it for a line owning the joke — the blog
+# outlived its dependency (Goal 1). Browser-side only: no server link-checking,
+# no build step. textContent keeps the fallback XSS-free. Scoped to .post-body
+# images so a future broken asset elsewhere doesn't claim Google died.
+_MEME_FALLBACK_SCRIPT = (
+    "<script>\n"
+    "(function () {\n"
+    "  function fallback(img) {\n"
+    '    var span = document.createElement("span");\n'
+    '    span.className = "meme-fallback";\n'
+    '    span.textContent = "it appears that the blog outlived google";\n'
+    "    img.replaceWith(span);\n"
+    "  }\n"
+    '  document.querySelectorAll(".post-body img").forEach(function (img) {\n'
+    "    img.onerror = function () { fallback(img); };\n"
+    "    if (img.complete && img.naturalWidth === 0) fallback(img);\n"
+    "  });\n"
+    "})();\n"
+    "</script>"
+)
+
 
 @router.get("/", response_class=HTMLResponse)
 def index():
@@ -59,7 +81,8 @@ def post_page(slug: str):
         f"<h1>{html.escape(post.title)}</h1>\n"
         f'<div class="post-meta">{meta}</div>\n'
         f'<div class="post-body">{render.render_post(post)}</div>\n'
-        "</article>"
+        "</article>\n"
+        f"{_MEME_FALLBACK_SCRIPT}"
     )
     return HTMLResponse(_layout(post.title, inner, description=post.description))
 
@@ -275,6 +298,7 @@ article h1 { font-size: 2.1rem; margin: 0.25rem 0 0.5rem; }
 .post-body li { margin: 0.3rem 0; }
 .post-body a { text-decoration: underline; text-underline-offset: 2px; }
 .post-body img { max-width: 100%; height: auto; border-radius: 8px; }
+.meme-fallback { color: var(--muted); font-style: italic; }
 .post-body blockquote {
   margin: 1.5rem 0; padding: 0.2rem 1.1rem;
   border-left: 3px solid var(--accent); color: var(--muted); font-style: italic;
