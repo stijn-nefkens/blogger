@@ -22,7 +22,7 @@ So I got to work. It turned out to be a matter of writing a spec for the applica
 
 The bulk of the work turned out to be in the fine-tuning of the text-to-speech engine. An engine that both uses a local neural network and sounds natural takes a good amount of CPU. Synthesizing a medium-length sentence takes around ~7 seconds, which is not the amount of time you want to wait when you start the app.
 
-![A skeleton sitting at a table with the caption "still waiting" — the universal mood of waiting for something slow to load](https://media1.tenor.com/m/fRcC6K4sPOYAAAAd/waiting-skeleton.gif)
+![A skeleton sitting and waiting, captioned "still waiting" — the universal mood of waiting for something slow to load](https://media.giphy.com/media/zPNt3eQcRZt0Q84CMW/giphy.gif)
 
 So I ended up adding a buffering mechanism, cutting the first sentences into smaller pieces, tweaking, etc.
 
