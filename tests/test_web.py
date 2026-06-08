@@ -57,6 +57,23 @@ def test_post_body_renders_static_image(client):
     assert '<img src="/static/memes/memey.png" alt="a meme" />' in html
 
 
+def test_post_page_has_meme_fallback_for_broken_images(client):
+    # Memes are hotlinked GIFs; a broken one should swap to the outlived-Google line.
+    _create(client, "Memey", body="![a meme](https://media.tenor.com/dead.gif)")
+    html = client.get("/posts/memey").text
+    # The meme still renders; the browser only swaps it if it 404s.
+    assert '<img src="https://media.tenor.com/dead.gif" alt="a meme" />' in html
+    # The client-side handler is wired to post-body images with the exact line.
+    assert "it appears that the blog outlived google" in html
+    assert '.post-body img' in html
+
+
+def test_listing_has_no_meme_fallback(client):
+    # The fallback is scoped to post pages, not the listing.
+    _create(client, "Memey", body="![a meme](https://media.tenor.com/dead.gif)")
+    assert "it appears that the blog outlived google" not in client.get("/").text
+
+
 def test_home_header_shows_site_name_not_a_back_link(client):
     html = client.get("/").text
     assert '<span class="brand">Blog</span>' in html
