@@ -16,7 +16,7 @@ tags:
 
 We wisten het eigenlijk al wel, maar het werd er nog even ingewreven door de AI: de Riot shield ability in Sheepz werkt niet.
 
-> **High — RiotShield never actually blocks anything.** De constructor roept `removeEffect()` aan, die `e.unshield()` aanroept vóórdat er ooit een `shield()` is uitgevoerd. De shield-telling is een teller (`hasShield() = shields > 0`). Die ongematchte `unshield()` zet hem permanent op −1, dus terwijl het schild "actief" is, staat de teller op 0 en is `hasShield()` false. Projectielen worden nooit afgeketst.
+> **High — RiotShield never actually blocks anything.** The constructor calls `removeEffect()`, which calls `e.unshield()` before any `shield()` has ever run. The shield count is a counter (`hasShield() = shields > 0`). That unmatched `unshield()` permanently offsets it by −1, so while the shield is "active" the count is 0 and `hasShield()` is false. Projectiles are never deflected.
 
 Gelukkig wist ook de AI niet alle bugs te fixen, en was het zelfs in staat een nieuwe bug te introduceren.
 
